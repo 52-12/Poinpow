@@ -11,8 +11,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(HandledScreen.class)
 public class ChestMixin {
+
     @Inject(method = "drawSlot", at = @At("HEAD"), cancellable = true)
-    private void onItemRender(DrawContext context, Slot slot, CallbackInfo ci) {
+    private void onItemRender(
+            DrawContext context,
+            Slot slot,
+            int x,
+            int y,
+            CallbackInfo ci
+    ) {
         BlockChestAds.check(slot);
     }
 }

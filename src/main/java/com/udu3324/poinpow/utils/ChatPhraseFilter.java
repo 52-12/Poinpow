@@ -27,24 +27,29 @@ public class ChatPhraseFilter {
     public static ArrayList<Pattern> list = Config.getListOfRegex();
 
     public static void check(String chat, CallbackInfo ci) {
-        // return false if toggled off
+        // Return if toggled off
         if (!toggled.get()) return;
 
-        // return if not on minehut
+        // Return if not on Minehut
         if (!Poinpow.onMinehut) return;
 
-        // return if there's nothing in the list
+        // Return if there's nothing in the list
         if (list.isEmpty()) return;
 
-        if (MinecraftClient.getInstance().player == null) return;
+        MinecraftClient client = MinecraftClient.getInstance();
 
-        // check for scoreboard
-        Scoreboard scoreboard = MinecraftClient.getInstance().player.getScoreboard();
+        // Return if there is no world
+        if (client.world == null) return;
+
+        // Check for scoreboard
+        Scoreboard scoreboard = client.world.getScoreboard();
         ArrayList<String> scores = new ArrayList<>();
+
         for (ScoreboardObjective objective : scoreboard.getObjectives()) {
             scores.add(objective.getDisplayName().toString());
         }
 
+        // Return if this isn't the Minehut lobby
         if (!scores.toString().toLowerCase().contains("minehut")) return;
 
         for (Pattern p : list) {
@@ -60,20 +65,31 @@ public class ChatPhraseFilter {
         Commands.running = true;
         String input = StringArgumentType.getString(context, "regex");
 
-        //refresh list
+        // Refresh list
         list = Config.getListOfRegex();
 
-        //check if regex already exists
+        // Check if regex already exists
         for (Pattern p : list) {
             if (p.toString().equals(input)) {
-                context.getSource().sendFeedback(Text.literal("The regex you provided is already in the filter.").styled(style -> style.withColor(Formatting.RED)));
+                context.getSource().sendFeedback(
+                        Text.literal("The regex you provided is already in the filter.")
+                                .styled(style -> style.withColor(Formatting.RED))
+                );
+
                 Commands.running = false;
                 return Command.SINGLE_SUCCESS;
             }
         }
 
-        context.getSource().sendFeedback(Text.literal("\nAdded the regex below to ChatPhraseFilter").styled(style -> style.withColor(Formatting.GREEN)));
-        context.getSource().sendFeedback(Text.literal(input + "\n").styled(style -> style.withColor(Formatting.GOLD)));
+        context.getSource().sendFeedback(
+                Text.literal("\nAdded the regex below to ChatPhraseFilter")
+                        .styled(style -> style.withColor(Formatting.GREEN))
+        );
+
+        context.getSource().sendFeedback(
+                Text.literal(input + "\n")
+                        .styled(style -> style.withColor(Formatting.GOLD))
+        );
 
         Poinpow.log.info("addRegex(): {}", input);
 
@@ -88,10 +104,10 @@ public class ChatPhraseFilter {
         Commands.running = true;
         String input = StringArgumentType.getString(context, "regex");
 
-        //refresh list
+        // Refresh list
         list = Config.getListOfRegex();
 
-        //check if regex already exists
+        // Check if regex exists
         for (Pattern p : list) {
             if (p.toString().equals(input)) {
                 Poinpow.log.info("removeRegex(): {}", input);
@@ -99,18 +115,33 @@ public class ChatPhraseFilter {
                 Config.removeRegex(input);
                 list.remove(p);
 
-                context.getSource().sendFeedback(Text.literal("Successfully removed \"" + input + "\" from the filter.").styled(style -> style.withColor(Formatting.GREEN)));
+                context.getSource().sendFeedback(
+                        Text.literal(
+                                "Successfully removed \"" + input + "\" from the filter."
+                        ).styled(style -> style.withColor(Formatting.GREEN))
+                );
 
                 Commands.running = false;
                 return Command.SINGLE_SUCCESS;
             }
         }
 
-        context.getSource().sendFeedback(Text.literal("Couldn't find \"" + input + "\" in the list of regex! \nDo \"/poinpow " + name + " list\" to see a clickable list to remove regex.").styled(style -> style
-                .withClickEvent(new ClickEvent.SuggestCommand("/poinpow " + name + " list"))
-                .withUnderline(true)
-                .withColor(Formatting.RED)
-        ));
+        context.getSource().sendFeedback(
+                Text.literal(
+                        "Couldn't find \"" + input +
+                                "\" in the list of regex! \nDo \"/poinpow " +
+                                name +
+                                " list\" to see a clickable list to remove regex."
+                ).styled(style -> style
+                        .withClickEvent(
+                                new ClickEvent.SuggestCommand(
+                                        "/poinpow " + name + " list"
+                                )
+                        )
+                        .withUnderline(true)
+                        .withColor(Formatting.RED)
+                )
+        );
 
         Commands.running = false;
         return Command.SINGLE_SUCCESS;
@@ -119,27 +150,49 @@ public class ChatPhraseFilter {
     public static int list(FabricClientCommandSource source) {
         Commands.running = true;
 
-        //refresh list
+        // Refresh list
         list = Config.getListOfRegex();
 
-        //first check if list has nothing in it
+        // Check if list is empty
         if (list.isEmpty()) {
-            source.sendFeedback(Text.literal("\nThere is no regex in ChatPhraseFilter.").styled(style -> style.withColor(Formatting.BLUE)));
+            source.sendFeedback(
+                    Text.literal("\nThere is no regex in ChatPhraseFilter.")
+                            .styled(style -> style.withColor(Formatting.BLUE))
+            );
+
             Commands.running = false;
             return Command.SINGLE_SUCCESS;
         }
 
-        //show the list
-        source.sendFeedback(Text.literal("\nHere's the list of regex in ChatPhraseFilter.").styled(style -> style.withColor(Formatting.GREEN)));
+        // Show the list
+        source.sendFeedback(
+                Text.literal("\nHere's the list of regex in ChatPhraseFilter.")
+                        .styled(style -> style.withColor(Formatting.GREEN))
+        );
 
         for (Pattern p : list) {
-            source.sendFeedback(Text.literal(p.toString()).styled(style -> style
-                    .withClickEvent(new ClickEvent.SuggestCommand("/poinpow " + name + " remove " + "\"" + p + "\""))
-                    .withColor(Formatting.GOLD)
-            ));
+            source.sendFeedback(
+                    Text.literal(p.toString())
+                            .styled(style -> style
+                                    .withClickEvent(
+                                            new ClickEvent.SuggestCommand(
+                                                    "/poinpow " +
+                                                            name +
+                                                            " remove \"" +
+                                                            p +
+                                                            "\""
+                                            )
+                                    )
+                                    .withColor(Formatting.GOLD)
+                            )
+            );
         }
 
-        source.sendFeedback(Text.literal("Click on the text to remove it from the filter.\n").styled(style -> style.withColor(Formatting.RED)));
+        source.sendFeedback(
+                Text.literal(
+                        "Click on the text to remove it from the filter.\n"
+                ).styled(style -> style.withColor(Formatting.RED))
+        );
 
         Commands.running = false;
         return Command.SINGLE_SUCCESS;
