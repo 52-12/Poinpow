@@ -15,15 +15,21 @@ public class BlockRaids {
     final static Pattern pattern2 = Pattern.compile("Minehut \\| A new raid is ready! Enter the green circle to begin\\.");
     final static Pattern pattern3 = Pattern.compile("Minehut \\| Raiding is on cooldown for another [0-9]+ Second(s|)\\.");
     final static Pattern pattern4 = Pattern.compile("Minehut \\| (Joined|Left) the raid");
+    final static Pattern pattern5 = Pattern.compile("Minehut \\| A new raid is ready! Enter the circle to begin.");
 
-    public static Boolean check(String chat, CallbackInfo ci) {
-        // return false if toggled off
+    public static boolean check(String chat, CallbackInfo ci) {
+        // Return false if toggled off
         if (!toggled.get()) return false;
 
-        // return if not on minehut
+        // Return false if not on Minehut
         if (!Poinpow.onMinehut) return false;
 
-        if (pattern.matcher(chat).find() || pattern2.matcher(chat).find() || pattern3.matcher(chat).find() || pattern4.matcher(chat).find()) {
+        if (pattern.matcher(chat).find()
+                || pattern2.matcher(chat).find()
+                || pattern3.matcher(chat).find()
+                || pattern4.matcher(chat).find()
+                || pattern5.matcher(chat).find()) {
+
             Poinpow.log.info("Blocked: {}", chat);
             ci.cancel();
 
